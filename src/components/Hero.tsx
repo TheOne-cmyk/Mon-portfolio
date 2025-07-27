@@ -124,18 +124,24 @@ const Hero: React.FC = () => {
       <div className="relative z-20 text-center px-6 max-w-4xl">
         {/* Name with glitch effect */}
         <motion.h1 
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.2 }}
-          className="text-6xl md:text-8xl font-bold mb-6 relative"
-        >
-          <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent animate-pulse">
-            Warren
-          </span>
-          <span className="block text-white/90 text-4xl md:text-6xl mt-2 font-light">
-            Tsobgou
-          </span>
-        </motion.h1>
+  initial={{ opacity: 0, y: 50 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 1, delay: 0.2 }}
+  className="text-6xl md:text-8xl font-bold relative"
+>
+  {/* Premier nom avec margin-bottom réduit */}
+  <motion.span 
+    className="block bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent animate-pulse"
+    style={{ marginTop: '2rem', marginBottom: '0rem' }} // Ajustez cette valeur (4px)
+  >
+    Francis Warren
+  </motion.span>
+  
+  {/* Deuxième nom garde sa position normale */}
+  <span className="block text-white/90 text-4xl md:text-6xl font-light">
+    Tsobgou Dongmo
+  </span>
+</motion.h1>
 
         {/* Subtitle with typewriter effect */}
         <motion.p 
