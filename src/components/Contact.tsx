@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { Mail, Phone, MapPin, Send, Github, Linkedin, Twitter, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Github, Linkedin, Twitter, Clock, CheckCircle, AlertCircle, GithubIcon } from 'lucide-react';
 import emailjs from '@emailjs/browser';
+import { BsTwitterX } from 'react-icons/bs';
 
 interface FormData {
   name: string;
@@ -57,7 +58,7 @@ const Contact: React.FC = () => {
   const socialLinks = [
     { icon: Github, href: 'https://github.com/TheOne-cmyk', label: 'GitHub' },
     { icon: Linkedin, href: 'https://linkedin.com/in/warren-tsobgou-21423936', label: 'LinkedIn' },
-    { icon: Twitter, href: 'https://twitter.com/tsobgou29837', label: 'Twitter' }
+    { icon: BsTwitterX, href: 'https://twitter.com/tsobgou29837', label: 'Twitter' }
   ];
 
   const projectTypes = [

@@ -289,7 +289,7 @@ const Skills: React.FC = () => {
             </motion.div>
           ))}
         </div>
-{/* Technologies Mastery - Carousel adaptatif */}
+{/* Technologies Mastery - Version mobile améliorée */}
 <motion.div 
   initial={{ opacity: 0 }}
   animate={inView ? { opacity: 1 } : {}}
@@ -305,50 +305,80 @@ const Skills: React.FC = () => {
     Technologies Maîtrisées
   </motion.h3>
 
-  {/* Version mobile - linéaire avec sliding */}
-  <div className="md:hidden relative h-96 w-full overflow-hidden py-4">
+  {/* Version mobile - Carrousel tactile amélioré */}
+  <div className="md:hidden relative h-[420px] w-full overflow-hidden py-4">
+    {/* Conteneur des cartes avec gestes tactiles */}
     <motion.div
       className="flex items-center h-full"
       animate={{
-        x: -activeIndex * 280 + (typeof window !== 'undefined' ? window.innerWidth / 2 - 140 : 0),
+        x: -activeIndex * (window.innerWidth * 0.8) + (window.innerWidth * 0.1),
       }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      drag="x"
+      dragConstraints={{
+        left: -technologies.length * (window.innerWidth * 0.8) + window.innerWidth,
+        right: 0
+      }}
+      onDragEnd={(e, { offset, velocity }) => {
+        const dragOffset = offset.x;
+        const dragVelocity = velocity.x;
+        
+        if (dragOffset < -50 || dragVelocity < -500) {
+          setActiveIndex(prev => Math.min(prev + 1, technologies.length - 1));
+        } else if (dragOffset > 50 || dragVelocity > 500) {
+          setActiveIndex(prev => Math.max(prev - 1, 0));
+        }
+      }}
     >
       {technologies.map((tech, i) => (
         <motion.div
           key={i}
-          className="flex-shrink-0 w-64 h-80 mx-2 bg-gray-900/80 backdrop-blur-lg border border-cyan-400/30 rounded-xl p-5 flex flex-col items-center shadow-lg"
+          className="flex-shrink-0 w-[70vw] h-[380px] mx-[5vw] bg-gray-900/80 backdrop-blur-lg border border-cyan-400/30 rounded-2xl p-6 flex flex-col items-center shadow-lg"
           initial={{ opacity: 0, y: 20 }}
           animate={{ 
-            opacity: Math.max(0.7, 1 - Math.abs(i - activeIndex) * 0.7),
+            opacity: 1 - Math.abs(i - activeIndex) * 0.4,
             y: 0,
-            scale: i === activeIndex ? 1.1 : 0.95,
+            scale: i === activeIndex ? 1 : 0.9,
             transition: { delay: i * 0.1 }
           }}
           whileHover={{
-            scale: 1.05,
-            boxShadow: '0 20px 25px -5px rgba(104, 211, 246, 0.3)',
-            transition: { duration: 0.2 }
+            scale: i === activeIndex ? 1.05 : 0.95,
+            boxShadow: i === activeIndex ? '0 20px 25px -5px rgba(104, 211, 246, 0.3)' : 'none',
           }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setActiveIndex(i)}
+          style={{
+            zIndex: i === activeIndex ? 10 : 1,
+            filter: i === activeIndex ? 'none' : 'brightness(0.7)'
+          }}
         >
+          {/* Animation de l'icône */}
           <motion.div 
-            className="text-6xl mb-5 flex items-center justify-center w-20 h-20"
+            className="text-6xl mb-6 flex items-center justify-center w-24 h-24 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-2xl"
             whileHover={{
               rotate: [0, 10, -10, 0],
               transition: { duration: 0.6 }
+            }}
+            animate={{
+              y: i === activeIndex ? [0, -10, 0] : 0,
+              transition: i === activeIndex ? { 
+                repeat: Infinity, 
+                repeatType: "loop",
+                duration: 3 
+              } : {}
             }}
           >
             {tech.icon}
           </motion.div>
 
-          <div className="text-center flex-1 flex flex-col space-y-3">
-            <h4 className="text-xl font-bold text-cyan-100 mb-2">
+          {/* Contenu de la carte */}
+          <div className="text-center flex-1 flex flex-col space-y-4">
+            <h4 className="text-2xl font-bold text-cyan-100 mb-2">
               {tech.name}
             </h4>
             
-            <div className="mt-auto w-full space-y-3">
-              <div className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+            <div className="mt-auto w-full space-y-4">
+              <div className={`px-4 py-2 rounded-full text-sm font-medium ${
                 tech.level === 'Expert' 
                   ? 'bg-green-500/20 text-green-300'
                   : tech.level === 'Intermédiaire'
@@ -358,34 +388,63 @@ const Skills: React.FC = () => {
                 {tech.level}
               </div>
               
-              <div className="w-full bg-gray-800 rounded-full h-2 mb-2 overflow-hidden">
+              {/* Barre de progression animée */}
+              <div className="w-full bg-gray-800 rounded-full h-2.5 mb-3 overflow-hidden">
                 <motion.div 
                   className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-purple-500"
+                  initial={{ width: 0 }}
                   animate={{ 
                     width: `${tech.years === '1+' ? '70%' : '90%'}`,
+                    transition: { delay: 0.3 + i * 0.1 }
                   }}
                 />
               </div>
+              
               <p className="text-sm text-cyan-300/70">
                 {tech.years} {tech.years === '1+' ? 'an' : 'ans'} d'expérience
               </p>
             </div>
           </div>
 
+          {/* Effet de mise en avant pour la carte active */}
           {i === activeIndex && (
             <>
               <motion.div 
-                className="absolute inset-0 rounded-xl border-2 border-cyan-400/50 pointer-events-none"
+                className="absolute inset-0 rounded-2xl border-2 border-cyan-400/50 pointer-events-none"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ repeat: Infinity, repeatType: "reverse", duration: 1.5 }}
               />
-              <div className="absolute -inset-1 bg-cyan-500/10 rounded-xl blur-md pointer-events-none" />
+              <motion.div 
+                className="absolute -inset-1 bg-cyan-500/10 rounded-2xl blur-md pointer-events-none"
+                animate={{
+                  opacity: [0.3, 0.5, 0.3],
+                  transition: { repeat: Infinity, duration: 2 }
+                }}
+              />
             </>
           )}
         </motion.div>
       ))}
     </motion.div>
+
+    {/* Indicateurs de position (points) */}
+    <div className="flex justify-center mt-6 gap-2">
+      {technologies.map((_, i) => (
+        <motion.button
+          key={i}
+          onClick={() => setActiveIndex(i)}
+          className={`w-3 h-3 rounded-full transition-all ${
+            i === activeIndex 
+              ? 'bg-gradient-to-r from-cyan-400 to-purple-500 scale-125' 
+              : 'bg-gray-600 hover:bg-gray-500'
+          }`}
+          whileHover={{ scale: 1.2 }}
+          whileTap={{ scale: 0.9 }}
+          aria-label={`Aller à la technologie ${i+1}`}
+        />
+      ))}
+    </div>
   </div>
 
   {/* Version desktop - circulaire */}

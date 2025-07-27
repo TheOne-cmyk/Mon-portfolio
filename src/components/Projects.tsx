@@ -199,15 +199,6 @@ const projects = [
       >
         {/* Project Card */}
         <div className="relative h-80 lg:h-96 bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl overflow-hidden border border-white/10 backdrop-blur-sm hover:border-purple-400/30 transition-all duration-500">
-          {/* Featured Badge */}
-          {project.featured && (
-            <div className="absolute top-4 left-4 z-10">
-              <div className="px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full text-xs font-bold text-black">
-                EN VEDETTE
-              </div>
-            </div>
-          )}
-
           {/* Image */}
           <div className="absolute inset-0">
             <img 
@@ -298,10 +289,6 @@ const projects = [
           transition={{ duration: 0.8, delay: 0.8 }}
           className="text-center mt-16"
         >
-          <button className="group relative px-8 py-4 border-2 border-white/20 rounded-full font-semibold text-white backdrop-blur-sm hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 hover:border-transparent transition-all duration-300 hover:scale-105">
-            <span className="relative z-10">Voir Tous les Projets</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </button>
         </motion.div>
       </div>
 

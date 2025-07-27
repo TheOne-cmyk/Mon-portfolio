@@ -21,7 +21,8 @@ const Footer: React.FC = () => {
     'Developpement Web ',
     ' Solutions E-commerce',
     'Optimisation des performances',
-    'Design Pattern'
+    'Design Pattern',
+    'Infographie'
   ];
 
   return (

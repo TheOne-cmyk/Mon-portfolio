@@ -2,6 +2,8 @@ import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
 import { ChevronDown, Github, Linkedin, Mail } from 'lucide-react';
+import { BsTwitterX } from 'react-icons/bs';
+
 
 const Hero: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -163,12 +165,25 @@ const Hero: React.FC = () => {
           transition={{ duration: 1, delay: 1.5 }}
           className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
         >
-          <button className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full font-semibold text-white overflow-hidden transform hover:scale-105 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/25">
+          <button
+            className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full font-semibold text-white overflow-hidden transform hover:scale-105 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/25"
+            onClick={() => {
+              const section = document.getElementById('projects');
+              if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+          >
             <span className="relative z-10">Voir mon travail</span>
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </button>
           
-          <button className="group px-8 py-4 border-2 border-white/20 rounded-full font-semibold text-white backdrop-blur-sm hover:bg-white/10 transition-all duration-300 hover:border-purple-400">
+          <button
+            className="group px-8 py-4 border-2 border-white/20 rounded-full font-semibold text-white backdrop-blur-sm hover:bg-white/10 transition-all duration-300 hover:border-purple-400"
+            onClick={() => {
+              window.open('/CV_Warren .pdf', '_blank');
+            }}
+          >
             Voir mon CV
           </button>
         </motion.div>
@@ -180,8 +195,13 @@ const Hero: React.FC = () => {
           transition={{ duration: 1, delay: 1.8 }}
           className="flex justify-center space-x-6 mb-16"
         >
-          {[Github, Linkedin, Mail].map((Icon, index) => (
-            <a key={index} href="#" className="group">
+          {[
+            { Icon: Github, href: 'https://github.com/TheOne-cmyk' },
+            { Icon: Linkedin, href: 'https://linkedin.com/in/warren-tsobgou-21423936' },
+            { Icon: Mail, href: 'mailto:tsobgouwarren@gmail.com' },
+            { Icon: BsTwitterX, href: 'https://twitter.com/tsobgou29837' }
+          ].map(({ Icon, href }, index) => (
+            <a key={index} href={href} target="_blank" rel="noopener noreferrer" className="group">
               <div className="p-3 rounded-full border border-white/20 backdrop-blur-sm hover:bg-white/10 hover:border-purple-400 transition-all duration-300 hover:scale-110">
                 <Icon className="w-6 h-6 text-white group-hover:text-purple-400 transition-colors duration-300" />
               </div>

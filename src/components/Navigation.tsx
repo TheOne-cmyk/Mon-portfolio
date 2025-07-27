@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Home, User, Briefcase, Code, Mail } from 'lucide-react';
+import { Menu, X, Home, User, Briefcase, Code, Mail, Github, Linkedin } from 'lucide-react';
+import { BsTwitterX } from 'react-icons/bs';
 
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -151,16 +152,22 @@ const Navigation: React.FC = () => {
                 <div className="mt-12 pt-6 border-t border-white/10">
                   <p className="text-gray-400 text-sm mb-4">Connectez-vous à moi</p>
                   <div className="flex space-x-4">
-                    {['GitHub', 'LinkedIn', 'Twitter'].map((social, index) => (
+                    {[
+                      { Icon: Github, href: 'https://github.com/TheOne-cmyk' },
+                      { Icon: Linkedin, href: 'https://linkedin.com/in/warren-tsobgou-21423936' },
+                      { Icon: BsTwitterX, href: 'https://twitter.com/tsobgou29837' }
+                    ].map(({ Icon, href }, index) => (
                       <motion.a
-                        key={social}
-                        href="#"
+                        key={href}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.5 + index * 0.1 }}
                         className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-purple-600 hover:scale-110 transition-all duration-300"
                       >
-                        {social[0]}
+                        <Icon className="w-6 h-6" />
                       </motion.a>
                     ))}
                   </div>
