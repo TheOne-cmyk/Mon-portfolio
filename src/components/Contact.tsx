@@ -8,9 +8,7 @@ import { BsTwitterX } from 'react-icons/bs';
 interface FormData {
   name: string;
   email: string;
-  company: string;
   project: string;
-  budget: string;
   message: string;
 }
 
@@ -23,9 +21,7 @@ const Contact: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
-    company: '',
     project: 'web-development',
-    budget: '',
     message: ''
   });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -56,7 +52,7 @@ const Contact: React.FC = () => {
   ];
 
   const socialLinks = [
-    { icon: Github, href: 'https://github.com/TheOne-cmyk', label: 'GitHub' },
+    { icon: GithubIcon, href: 'https://github.com/TheOne-cmyk', label: 'GitHub' },
     { icon: Linkedin, href: 'https://linkedin.com/in/warren-tsobgou-21423936', label: 'LinkedIn' },
     { icon: BsTwitterX, href: 'https://twitter.com/tsobgou29837', label: 'Twitter' }
   ];
@@ -127,9 +123,7 @@ const Contact: React.FC = () => {
       setFormData({
         name: '',
         email: '',
-        company: '',
         project: 'web-development',
-        budget: '',
         message: ''
       });
     } catch (error) {
@@ -276,22 +270,6 @@ const Contact: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Company */}
-                  <div>
-                    <label htmlFor="company" className="block text-sm font-medium text-gray-300 mb-2">
-                      Entreprise
-                    </label>
-                    <input
-                      type="text"
-                      id="company"
-                      name="company"
-                      value={formData.company}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:border-purple-400 focus:ring-purple-400/30 transition-all duration-300 text-white placeholder-gray-400"
-                      placeholder="Nom de votre entreprise (optionnel)"
-                    />
-                  </div>
-
                   {/* Project Type */}
                   <div>
                     <label htmlFor="project" className="block text-sm font-medium text-gray-300 mb-2">
@@ -310,22 +288,6 @@ const Contact: React.FC = () => {
                         </option>
                       ))}
                     </select>
-                  </div>
-
-                  {/* Budget */}
-                  <div>
-                    <label htmlFor="budget" className="block text-sm font-medium text-gray-300 mb-2">
-                      Budget estimé (optionnel)
-                    </label>
-                    <input
-                      type="text"
-                      id="budget"
-                      name="budget"
-                      value={formData.budget}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:border-purple-400 focus:ring-purple-400/30 transition-all duration-300 text-white placeholder-gray-400"
-                      placeholder="Votre budget approximatif"
-                    />
                   </div>
 
                   {/* Message */}
