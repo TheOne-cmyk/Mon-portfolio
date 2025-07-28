@@ -20,7 +20,6 @@ const Footer: React.FC = () => {
   const services = [
     'Developpement Web ',
     ' Solutions E-commerce',
-    'Optimisation des performances',
     'Design Pattern',
     'Infographie'
   ];
@@ -82,46 +81,45 @@ const Footer: React.FC = () => {
               </div>
             </motion.div>
 
-            {/* Quick Links */}
+            {/* Combined Quick Links and Services Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
+              className="lg:col-span-2 grid md:grid-cols-2 gap-8"
             >
-              <h4 className="text-white font-semibold text-lg mb-6">Liens Rapides</h4>
-              <ul className="space-y-3">
-                {quickLinks.map((link, index) => (
-                  <li key={index}>
-                    <a
-                      href={link.href}
-                      className="text-gray-400 hover:text-purple-400 transition-colors duration-300 flex items-center group"
-                    >
-                      <span className="w-2 h-2 bg-purple-400 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
+              {/* Quick Links */}
+              <div>
+                <h4 className="text-white font-semibold text-lg mb-6">Liens Rapides</h4>
+                <ul className="space-y-3">
+                  {quickLinks.map((link, index) => (
+                    <li key={index}>
+                      <a
+                        href={link.href}
+                        className="text-gray-400 hover:text-purple-400 transition-colors duration-300 flex items-center group"
+                      >
+                        <span className="w-2 h-2 bg-purple-400 rounded-full mr-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                        {link.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            {/* Services */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-            >
-              <h4 className="text-white font-semibold text-lg mb-6">Services</h4>
-              <ul className="space-y-3">
-                {services.map((service, index) => (
-                  <li key={index}>
-                    <span className="text-gray-400 text-sm hover:text-blue-400 transition-colors duration-300 cursor-pointer">
-                      {service}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              {/* Services */}
+              <div>
+                <h4 className="text-white font-semibold text-lg mb-6">Services</h4>
+                <ul className="space-y-3">
+                  {services.map((service, index) => (
+                    <li key={index}>
+                      <span className="text-gray-400 text-sm hover:text-blue-400 transition-colors duration-300 cursor-pointer">
+                        {service}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </motion.div>
           </div>
         </div>
@@ -139,7 +137,6 @@ const Footer: React.FC = () => {
             >
               <span>© {currentYear} Warren Tsobgou. Codé avec Passion </span>
               <Heart className="w-4 h-4 text-gradient-to-r from-purple-600 to-cyan-500 animate-pulse" fill="currentColor" />
-              {/* <span> et beaucoup de Musique </span> */}
             </motion.div>
 
             {/* Back to Top */}

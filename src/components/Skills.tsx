@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { Code2, Server, Zap, Award, Star, Cpu, Monitor, Wrench } from 'lucide-react';
+import { Code2, Server, Zap, Award, Star, Cpu, Monitor, Wrench, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FaReact, FaJs, FaDocker, FaFigma, FaPhp } from 'react-icons/fa';
 import { SiTypescript, SiTailwindcss, SiMysql, SiPostgresql, SiC } from 'react-icons/si';
 import 'devicon/devicon.min.css';
@@ -9,7 +9,9 @@ import 'devicon/devicon.min.css';
 const Skills: React.FC = () => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeTechIndex, setActiveTechIndex] = useState(0);
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState(1); // Start with center card
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const skillCategories = [
     {
@@ -86,16 +88,95 @@ const Skills: React.FC = () => {
     }
   ];
 
-  // Animation automatique du carousel circulaire
+  // Auto-scroll for technologies
   useEffect(() => {
     if (!inView) return;
 
     const interval = setInterval(() => {
-      setActiveIndex(prev => (prev + 1) % technologies.length);
+      setActiveTechIndex(prev => (prev + 1) % technologies.length);
     }, 3000);
 
     return () => clearInterval(interval);
   }, [inView, technologies.length]);
+
+  // Auto-scroll for categories
+  useEffect(() => {
+    if (!inView) return;
+
+    const interval = setInterval(() => {
+      setActiveCategoryIndex(prev => (prev + 1) % skillCategories.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [inView, skillCategories.length]);
+
+  // Calculate card positions and sizes for categories
+  const getCategoryCardStyle = (index: number) => {
+    const offset = (index - activeCategoryIndex + skillCategories.length) % skillCategories.length;
+    
+    if (offset === 0) { // Center card
+      return {
+        scale: 1.1,
+        opacity: 1,
+        zIndex: 10,
+        x: '0%',
+        filter: 'none'
+      };
+    }
+    
+    if (offset === 1) { // Right card
+      return {
+        scale: 0.9,
+        opacity: 0.8,
+        zIndex: 5,
+        x: '80%',
+        filter: 'brightness(0.7)'
+      };
+    }
+    
+    if (offset === skillCategories.length - 1) { // Left card
+      return {
+        scale: 0.9,
+        opacity: 0.8,
+        zIndex: 5,
+        x: '-80%',
+        filter: 'brightness(0.7)'
+      };
+    }
+    
+    // Other cards (hidden)
+    return {
+      scale: 0.8,
+      opacity: 0,
+      zIndex: 1,
+      x: `${(offset > 1 ? 1 : -1) * 120}%`,
+      filter: 'brightness(0.5)'
+    };
+  };
+
+  const nextCategory = () => {
+    setActiveCategoryIndex(prev => (prev + 1) % skillCategories.length);
+  };
+
+  const prevCategory = () => {
+    setActiveCategoryIndex(prev => (prev - 1 + skillCategories.length) % skillCategories.length);
+  };
+
+  // Calculate positions for technologies carousel
+  const getTechCardPosition = (index: number) => {
+    const totalItems = technologies.length;
+    const angle = (index * (2 * Math.PI)) / totalItems - (activeTechIndex * (2 * Math.PI)) / totalItems;
+    const radius = window.innerWidth < 768 ? 150 : 220;
+    
+    return {
+      x: Math.cos(angle) * radius,
+      y: Math.sin(angle) * radius * 0.7,
+      scale: index === activeTechIndex ? 1.2 : 0.9,
+      zIndex: index === activeTechIndex ? 10 : 1,
+      opacity: index === activeTechIndex ? 1 : 0.8,
+      filter: index === activeTechIndex ? 'none' : 'brightness(0.8)'
+    };
+  };
 
   // Animated skill radar chart effect
   useEffect(() => {
@@ -200,22 +281,6 @@ const Skills: React.FC = () => {
     };
   }, [inView]);
 
-  // Calcul des positions circulaires avec centrage amélioré
-  const getCardPosition = (index: number) => {
-    const totalItems = technologies.length;
-    const angle = (index * (2 * Math.PI)) / totalItems - (activeIndex * (2 * Math.PI)) / totalItems;
-    const radius = window.innerWidth < 768 ? 150 : 220; // Rayon augmenté
-    
-    return {
-      x: Math.cos(angle) * radius,
-      y: Math.sin(angle) * radius * 0.7, // Aplatissement réduit
-      scale: index === activeIndex ? 1.2 : 0.9, // Échelle plus marquée
-      zIndex: index === activeIndex ? 10 : 1,
-      opacity: index === activeIndex ? 1 : 0.8, // Opacité réduite
-      filter: index === activeIndex ? 'none' : 'brightness(0.8)'
-    };
-  };
-
   return (
     <section id="skills" className="min-h-screen py-20 bg-gradient-to-b from-black to-slate-900 relative overflow-hidden">
       {/* Background Elements */}
@@ -243,320 +308,386 @@ const Skills: React.FC = () => {
           <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full mt-6" />
         </motion.div>
 
-        {/* Skills Categories Grid */}
-        <div className="grid md:grid-cols-2 gap-6 md:gap-8 mb-16 md:mb-20 px-4">
-          {skillCategories.map((category, categoryIndex) => (
-            <motion.div
-              key={categoryIndex}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.2 + categoryIndex * 0.1 }}
-              className={`group relative bg-gradient-to-br ${category.bgGradient} backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 hover:border-purple-400/30 transition-all duration-500 hover:scale-[1.02] overflow-hidden`}
-            >
-              {/* Background Pattern */}
-              <div className="absolute inset-0 opacity-5">
-                <div className="absolute top-4 right-4">
-                  <category.icon className="w-24 h-24 md:w-32 md:h-32 text-white" />
-                </div>
-              </div>
+        {/* Skills Categories Carousel */}
+        <div className="relative h-[500px] w-full overflow-hidden mb-20">
+          {/* Navigation Arrows */}
+          <button
+            onClick={prevCategory}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-black/50 border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-purple-600 transition-colors duration-300"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          
+          <button
+            onClick={nextCategory}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-black/50  border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-purple-600 transition-colors duration-300"
+          >
+            <ChevronRight size={24} />
+          </button>
 
-              {/* Header */}
-              <div className="relative z-10 mb-6">
-                <div className={`w-14 h-14 md:w-16 md:h-16 bg-gradient-to-r ${category.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                  <category.icon className="w-6 h-6 md:w-8 md:h-8 text-white" />
-                </div>
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-2">{category.title}</h3>
-                <p className="text-gray-400 text-sm">{category.description}</p>
-              </div>
-
-              {/* Skills Tags */}
-              <div className="relative z-10 flex flex-wrap gap-2">
-                {category.skills.map((skill, skillIndex) => (
-                  <motion.span
-                    key={skillIndex}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={inView ? { opacity: 1, scale: 1 } : {}}
-                    transition={{ duration: 0.3, delay: 0.4 + categoryIndex * 0.1 + skillIndex * 0.05 }}
-                    className={`px-2 py-1 text-xs md:text-sm bg-gradient-to-r ${category.color} bg-opacity-20 border border-white/20 rounded-full text-white font-medium hover:scale-105 transition-transform cursor-pointer`}
+          {/* Cards Container */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <AnimatePresence custom={activeCategoryIndex}>
+              {skillCategories.map((category, index) => {
+                const style = getCategoryCardStyle(index);
+                
+                return (
+                  <motion.div
+                    key={category.title}
+                    custom={index}
+                    initial={{ 
+                      x: style.x,
+                      scale: style.scale * 0.9,
+                      opacity: 0
+                    }}
+                    animate={{ 
+                      x: style.x,
+                      scale: style.scale,
+                      opacity: style.opacity,
+                      filter: style.filter,
+                      transition: { 
+                        type: 'spring', 
+                        stiffness: 100,
+                        damping: 20
+                      }
+                    }}
+                    exit={{ 
+                      x: `${index > activeCategoryIndex ? '100%' : '-100%'}`,
+                      opacity: 0,
+                      transition: { duration: 0.3 }
+                    }}
+                    className={`absolute w-[90vw] max-w-md h-[400px] ${index === activeCategoryIndex ? 'z-10' : 'z-5'}`}
                   >
-                    {skill}
-                  </motion.span>
-                ))}
-              </div>
+                    <div className={`h-full bg-gradient-to-br ${category.bgGradient} backdrop-blur-sm rounded-2xl p-8 border border-white/10 transition-all duration-500 ${index === activeCategoryIndex ? 'hover:border-purple-400/50' : 'hover:border-blue-400/30'}`}>
+                      {/* Header */}
+                      <div className="relative z-10 mb-6">
+                        <div className={`w-16 h-16 bg-gradient-to-r ${category.color} rounded-2xl flex items-center justify-center mb-4 ${index === activeCategoryIndex ? 'group-hover:scale-110' : ''} transition-transform duration-300`}>
+                          <category.icon className="w-8 h-8 text-white" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-white mb-2">{category.title}</h3>
+                        <p className="text-gray-400 text-sm">{category.description}</p>
+                      </div>
 
-              {/* Hover Glow Effect */}
-              <div className={`absolute inset-0 bg-gradient-to-r ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-2xl`} />
-            </motion.div>
+                      {/* Skills Tags */}
+                      <div className="flex flex-wrap gap-2">
+                        {category.skills.map((skill, skillIndex) => (
+                          <motion.span
+                            key={skill}
+                            initial={{ opacity: 0, scale: 0 }}
+                            animate={{ 
+                              opacity: 1, 
+                              scale: 1,
+                              transition: { 
+                                delay: 0.2 + skillIndex * 0.05,
+                                type: 'spring'
+                              }
+                            }}
+                            className={`px-3 py-1 text-sm bg-gradient-to-r ${category.color} bg-opacity-30 border border-white/20 rounded-full text-white font-medium ${index === activeCategoryIndex ? 'hover:scale-105' : ''} transition-transform cursor-pointer`}
+                          >
+                            {skill}
+                          </motion.span>
+                        ))}
+                      </div>
+
+                      {/* Hover Glow Effect */}
+                      {index === activeCategoryIndex && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 0.2 }}
+                          className={`absolute inset-0 bg-gradient-to-r ${category.color} rounded-2xl pointer-events-none`}
+                        />
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Categories Indicators */}
+        <div className="flex justify-center mb-16 gap-2">
+          {skillCategories.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setActiveCategoryIndex(index)}
+              className={`w-3 h-3 rounded-full transition-all ${
+                index === activeCategoryIndex 
+                  ? 'bg-gradient-to-r from-blue-400 to-purple-500 scale-125' 
+                  : 'bg-gray-600 hover:bg-gray-500'
+              }`}
+            />
           ))}
         </div>
-{/* Technologies Mastery - Version mobile améliorée */}
-<motion.div 
-  initial={{ opacity: 0 }}
-  animate={inView ? { opacity: 1 } : {}}
-  transition={{ duration: 0.8 }}
-  className="relative py-10 md:py-16 overflow-x-hidden"
->
-  <motion.h3
-    initial={{ y: 50, opacity: 0 }}
-    animate={inView ? { y: 0, opacity: 1 } : {}}
-    transition={{ duration: 0.6 }}
-    className="text-3xl md:text-4xl font-bold text-center mb-10 md:mb-16 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 px-4"
-  >
-    Technologies Maîtrisées
-  </motion.h3>
 
-  {/* Version mobile - Carrousel tactile amélioré */}
-  <div className="md:hidden relative h-[420px] w-full overflow-hidden py-4">
-    {/* Conteneur des cartes avec gestes tactiles */}
-    <motion.div
-      className="flex items-center h-full"
-      animate={{
-        x: -activeIndex * (window.innerWidth * 0.8) + (window.innerWidth * 0.1),
-      }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      drag="x"
-      dragConstraints={{
-        left: -technologies.length * (window.innerWidth * 0.8) + window.innerWidth,
-        right: 0
-      }}
-      onDragEnd={(e, { offset, velocity }) => {
-        const dragOffset = offset.x;
-        const dragVelocity = velocity.x;
-        
-        if (dragOffset < -50 || dragVelocity < -500) {
-          setActiveIndex(prev => Math.min(prev + 1, technologies.length - 1));
-        } else if (dragOffset > 50 || dragVelocity > 500) {
-          setActiveIndex(prev => Math.max(prev - 1, 0));
-        }
-      }}
-    >
-      {technologies.map((tech, i) => (
-        <motion.div
-          key={i}
-          className="flex-shrink-0 w-[70vw] h-[380px] mx-[5vw] bg-gray-900/80 backdrop-blur-lg border border-cyan-400/30 rounded-2xl p-6 flex flex-col items-center shadow-lg"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ 
-            opacity: 1 - Math.abs(i - activeIndex) * 0.4,
-            y: 0,
-            scale: i === activeIndex ? 1 : 0.9,
-            transition: { delay: i * 0.1 }
-          }}
-          whileHover={{
-            scale: i === activeIndex ? 1.05 : 0.95,
-            boxShadow: i === activeIndex ? '0 20px 25px -5px rgba(104, 211, 246, 0.3)' : 'none',
-          }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setActiveIndex(i)}
-          style={{
-            zIndex: i === activeIndex ? 10 : 1,
-            filter: i === activeIndex ? 'none' : 'brightness(0.7)'
-          }}
+        {/* Technologies Mastery */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.8 }}
+          className="relative py-10 md:py-16 overflow-x-hidden"
         >
-          {/* Animation de l'icône */}
-          <motion.div 
-            className="text-6xl mb-6 flex items-center justify-center w-24 h-24 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-2xl"
-            whileHover={{
-              rotate: [0, 10, -10, 0],
-              transition: { duration: 0.6 }
-            }}
-            animate={{
-              y: i === activeIndex ? [0, -10, 0] : 0,
-              transition: i === activeIndex ? { 
-                repeat: Infinity, 
-                repeatType: "loop",
-                duration: 3 
-              } : {}
-            }}
+          <motion.h3
+            initial={{ y: 50, opacity: 0 }}
+            animate={inView ? { y: 0, opacity: 1 } : {}}
+            transition={{ duration: 0.6 }}
+            className="text-3xl md:text-4xl font-bold text-center mb-10 md:mb-16 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 px-4"
           >
-            {tech.icon}
-          </motion.div>
+            Technologies Maîtrisées
+          </motion.h3>
 
-          {/* Contenu de la carte */}
-          <div className="text-center flex-1 flex flex-col space-y-4">
-            <h4 className="text-2xl font-bold text-cyan-100 mb-2">
-              {tech.name}
-            </h4>
-            
-            <div className="mt-auto w-full space-y-4">
-              <div className={`px-4 py-2 rounded-full text-sm font-medium ${
-                tech.level === 'Expert' 
-                  ? 'bg-green-500/20 text-green-300'
-                  : tech.level === 'Intermédiaire'
-                  ? 'bg-cyan-500/20 text-cyan-300'
-                  : 'bg-purple-500/20 text-purple-300'
-              }`}>
-                {tech.level}
-              </div>
-              
-              {/* Barre de progression animée */}
-              <div className="w-full bg-gray-800 rounded-full h-2.5 mb-3 overflow-hidden">
-                <motion.div 
-                  className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-purple-500"
-                  initial={{ width: 0 }}
+          {/* Version mobile - Carrousel tactile amélioré */}
+          <div className="md:hidden relative h-[420px] w-full overflow-hidden py-4">
+            {/* Conteneur des cartes avec gestes tactiles */}
+            <motion.div
+              className="flex items-center h-full"
+              animate={{
+                x: -activeTechIndex * (window.innerWidth * 0.8) + (window.innerWidth * 0.1),
+              }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              drag="x"
+              dragConstraints={{
+                left: -technologies.length * (window.innerWidth * 0.8) + window.innerWidth,
+                right: 0
+              }}
+              onDragEnd={(e, { offset, velocity }) => {
+                const dragOffset = offset.x;
+                const dragVelocity = velocity.x;
+                
+                if (dragOffset < -50 || dragVelocity < -500) {
+                  setActiveTechIndex(prev => Math.min(prev + 1, technologies.length - 1));
+                } else if (dragOffset > 50 || dragVelocity > 500) {
+                  setActiveTechIndex(prev => Math.max(prev - 1, 0));
+                }
+              }}
+            >
+              {technologies.map((tech, i) => (
+                <motion.div
+                  key={i}
+                  className="flex-shrink-0 w-[70vw] h-[380px] mx-[5vw] bg-gray-900/80 backdrop-blur-lg border border-cyan-400/30 rounded-2xl p-6 flex flex-col items-center shadow-lg"
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ 
-                    width: `${tech.years === '1+' ? '70%' : '90%'}`,
-                    transition: { delay: 0.3 + i * 0.1 }
+                    opacity: 1 - Math.abs(i - activeTechIndex) * 0.4,
+                    y: 0,
+                    scale: i === activeTechIndex ? 1 : 0.9,
+                    transition: { delay: i * 0.1 }
                   }}
+                  whileHover={{
+                    scale: i === activeTechIndex ? 1.05 : 0.95,
+                    boxShadow: i === activeTechIndex ? '0 20px 25px -5px rgba(104, 211, 246, 0.3)' : 'none',
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setActiveTechIndex(i)}
+                  style={{
+                    zIndex: i === activeTechIndex ? 10 : 1,
+                    filter: i === activeTechIndex ? 'none' : 'brightness(0.7)'
+                  }}
+                >
+                  {/* Animation de l'icône */}
+                  <motion.div 
+                    className="text-6xl mb-6 flex items-center justify-center w-24 h-24 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-2xl"
+                    whileHover={{
+                      rotate: [0, 10, -10, 0],
+                      transition: { duration: 0.6 }
+                    }}
+                    animate={{
+                      y: i === activeTechIndex ? [0, -10, 0] : 0,
+                      transition: i === activeTechIndex ? { 
+                        repeat: Infinity, 
+                        repeatType: "loop",
+                        duration: 3 
+                      } : {}
+                    }}
+                  >
+                    {tech.icon}
+                  </motion.div>
+
+                  {/* Contenu de la carte */}
+                  <div className="text-center flex-1 flex flex-col space-y-4">
+                    <h4 className="text-2xl font-bold text-cyan-100 mb-2">
+                      {tech.name}
+                    </h4>
+                    
+                    <div className="mt-auto w-full space-y-4">
+                      <div className={`px-4 py-2 rounded-full text-sm font-medium ${
+                        tech.level === 'Expert' 
+                          ? 'bg-green-500/20 text-green-300'
+                          : tech.level === 'Intermédiaire'
+                          ? 'bg-cyan-500/20 text-cyan-300'
+                          : 'bg-purple-500/20 text-purple-300'
+                      }`}>
+                        {tech.level}
+                      </div>
+                      
+                      {/* Barre de progression animée */}
+                      <div className="w-full bg-gray-800 rounded-full h-2.5 mb-3 overflow-hidden">
+                        <motion.div 
+                          className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-purple-500"
+                          initial={{ width: 0 }}
+                          animate={{ 
+                            width: `${tech.years === '1+' ? '70%' : '90%'}`,
+                            transition: { delay: 0.3 + i * 0.1 }
+                          }}
+                        />
+                      </div>
+                      
+                      <p className="text-sm text-cyan-300/70">
+                        {tech.years} {tech.years === '1+' ? 'an' : 'ans'} d'expérience
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Effet de mise en avant pour la carte active */}
+                  {i === activeTechIndex && (
+                    <>
+                      <motion.div 
+                        className="absolute inset-0 rounded-2xl border-2 border-cyan-400/50 pointer-events-none"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ repeat: Infinity, repeatType: "reverse", duration: 1.5 }}
+                      />
+                      <motion.div 
+                        className="absolute -inset-1 bg-cyan-500/10 rounded-2xl blur-md pointer-events-none"
+                        animate={{
+                          opacity: [0.3, 0.5, 0.3],
+                          transition: { repeat: Infinity, duration: 2 }
+                        }}
+                      />
+                    </>
+                  )}
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Indicateurs de position (points) */}
+            <div className="flex justify-center mt-6 gap-2">
+              {technologies.map((_, i) => (
+                <motion.button
+                  key={i}
+                  onClick={() => setActiveTechIndex(i)}
+                  className={`w-3 h-3 rounded-full transition-all ${
+                    i === activeTechIndex 
+                      ? 'bg-gradient-to-r from-cyan-400 to-purple-500 scale-125' 
+                      : 'bg-gray-600 hover:bg-gray-500'
+                  }`}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                  aria-label={`Aller à la technologie ${i+1}`}
                 />
-              </div>
-              
-              <p className="text-sm text-cyan-300/70">
-                {tech.years} {tech.years === '1+' ? 'an' : 'ans'} d'expérience
-              </p>
+              ))}
             </div>
           </div>
 
-          {/* Effet de mise en avant pour la carte active */}
-          {i === activeIndex && (
-            <>
-              <motion.div 
-                className="absolute inset-0 rounded-2xl border-2 border-cyan-400/50 pointer-events-none"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ repeat: Infinity, repeatType: "reverse", duration: 1.5 }}
-              />
-              <motion.div 
-                className="absolute -inset-1 bg-cyan-500/10 rounded-2xl blur-md pointer-events-none"
-                animate={{
-                  opacity: [0.3, 0.5, 0.3],
-                  transition: { repeat: Infinity, duration: 2 }
-                }}
-              />
-            </>
-          )}
-        </motion.div>
-      ))}
-    </motion.div>
-
-    {/* Indicateurs de position (points) */}
-    <div className="flex justify-center mt-6 gap-2">
-      {technologies.map((_, i) => (
-        <motion.button
-          key={i}
-          onClick={() => setActiveIndex(i)}
-          className={`w-3 h-3 rounded-full transition-all ${
-            i === activeIndex 
-              ? 'bg-gradient-to-r from-cyan-400 to-purple-500 scale-125' 
-              : 'bg-gray-600 hover:bg-gray-500'
-          }`}
-          whileHover={{ scale: 1.2 }}
-          whileTap={{ scale: 0.9 }}
-          aria-label={`Aller à la technologie ${i+1}`}
-        />
-      ))}
-    </div>
-  </div>
-
-  {/* Version desktop - circulaire */}
-  <div className="hidden md:block relative h-[500px] w-full">
-    <div className="relative w-full h-full flex items-center justify-center">
-      {technologies.map((tech, i) => {
-        const position = getCardPosition(i);
-        
-        return (
-          <motion.div
-            key={i}
-            className="absolute w-52 h-64 bg-gray-900/80 backdrop-blur-lg border border-cyan-400/30 rounded-xl p-5 flex flex-col items-center shadow-lg"
-            initial={{ 
-              x: 0,
-              y: 0,
-              scale: 0.8,
-              opacity: 0
-            }}
-            animate={{
-              x: position.x,
-              y: position.y,
-              scale: position.scale,
-              opacity: position.opacity,
-              zIndex: position.zIndex,
-              transition: { 
-                type: 'spring', 
-                stiffness: 80,
-                damping: 15,
-                delay: i * 0.1
-              }
-            }}
-            whileHover={{ 
-              scale: Math.min(position.scale * 1.15, 1.25),
-              boxShadow: '0 25px 50px -12px rgba(104, 211, 246, 0.4)',
-              transition: { duration: 0.2 }
-            }}
-            onClick={() => setActiveIndex(i)}
-          >
-            <motion.div 
-              className="text-6xl mb-5 flex items-center justify-center w-20 h-20"
-              whileHover={{
-                rotate: [0, 10, -10, 0],
-                transition: { duration: 0.6 }
-              }}
-            >
-              {tech.icon}
-            </motion.div>
-
-            <div className="text-center flex-1 flex flex-col space-y-3">
-              <h4 className="text-xl font-bold text-cyan-100 mb-2">
-                {tech.name}
-              </h4>
-              
-              <div className="mt-auto w-full space-y-3">
-                <div className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-                  tech.level === 'Expert' 
-                    ? 'bg-green-500/20 text-green-300'
-                    : tech.level === 'Intermédiaire'
-                    ? 'bg-cyan-500/20 text-cyan-300'
-                    : 'bg-purple-500/20 text-purple-300'
-                }`}>
-                  {tech.level}
-                </div>
+          {/* Version desktop - circulaire */}
+          <div className="hidden md:block relative h-[500px] w-full">
+            <div className="relative w-full h-full flex items-center justify-center">
+              {technologies.map((tech, i) => {
+                const position = getTechCardPosition(i);
                 
-                <div className="w-full bg-gray-800 rounded-full h-2 mb-2 overflow-hidden">
-                  <motion.div 
-                    className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-purple-500"
-                    animate={{ 
-                      width: `${tech.years === '1+' ? '70%' : '90%'}`,
+                return (
+                  <motion.div
+                    key={i}
+                    className="absolute w-52 h-64 bg-gray-900/80 backdrop-blur-lg border border-cyan-400/30 rounded-xl p-5 flex flex-col items-center shadow-lg"
+                    initial={{ 
+                      x: 0,
+                      y: 0,
+                      scale: 0.8,
+                      opacity: 0
                     }}
-                  />
-                </div>
-                <p className="text-sm text-cyan-300/70">
-                  {tech.years} {tech.years === '1+' ? 'an' : 'ans'} d'expérience
-                </p>
-              </div>
+                    animate={{
+                      x: position.x,
+                      y: position.y,
+                      scale: position.scale,
+                      opacity: position.opacity,
+                      zIndex: position.zIndex,
+                      transition: { 
+                        type: 'spring', 
+                        stiffness: 80,
+                        damping: 15,
+                        delay: i * 0.1
+                      }
+                    }}
+                    whileHover={{ 
+                      scale: Math.min(position.scale * 1.15, 1.25),
+                      boxShadow: '0 25px 50px -12px rgba(104, 211, 246, 0.4)',
+                      transition: { duration: 0.2 }
+                    }}
+                    onClick={() => setActiveTechIndex(i)}
+                  >
+                    <motion.div 
+                      className="text-6xl mb-5 flex items-center justify-center w-20 h-20"
+                      whileHover={{
+                        rotate: [0, 10, -10, 0],
+                        transition: { duration: 0.6 }
+                      }}
+                    >
+                      {tech.icon}
+                    </motion.div>
+
+                    <div className="text-center flex-1 flex flex-col space-y-3">
+                      <h4 className="text-xl font-bold text-cyan-100 mb-2">
+                        {tech.name}
+                      </h4>
+                      
+                      <div className="mt-auto w-full space-y-3">
+                        <div className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                          tech.level === 'Expert' 
+                            ? 'bg-green-500/20 text-green-300'
+                            : tech.level === 'Intermédiaire'
+                            ? 'bg-cyan-500/20 text-cyan-300'
+                            : 'bg-purple-500/20 text-purple-300'
+                        }`}>
+                          {tech.level}
+                        </div>
+                        
+                        <div className="w-full bg-gray-800 rounded-full h-2 mb-2 overflow-hidden">
+                          <motion.div 
+                            className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-purple-500"
+                            animate={{ 
+                              width: `${tech.years === '1+' ? '70%' : '90%'}`,
+                            }}
+                          />
+                        </div>
+                        <p className="text-sm text-cyan-300/70">
+                          {tech.years} {tech.years === '1+' ? 'an' : 'ans'} d'expérience
+                        </p>
+                      </div>
+                    </div>
+
+                    {i === activeTechIndex && (
+                      <>
+                        <motion.div 
+                          className="absolute inset-0 rounded-xl border-2 border-cyan-400/50 pointer-events-none"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ repeat: Infinity, repeatType: "reverse", duration: 1.5 }}
+                        />
+                        <div className="absolute -inset-1 bg-cyan-500/10 rounded-xl blur-md pointer-events-none" />
+                      </>
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
+          </div>
 
-            {i === activeIndex && (
-              <>
-                <motion.div 
-                  className="absolute inset-0 rounded-xl border-2 border-cyan-400/50 pointer-events-none"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ repeat: Infinity, repeatType: "reverse", duration: 1.5 }}
-                />
-                <div className="absolute -inset-1 bg-cyan-500/10 rounded-xl blur-md pointer-events-none" />
-              </>
-            )}
-          </motion.div>
-        );
-      })}
-    </div>
-  </div>
-
-  {/* Contrôles de navigation */}
-  <div className="flex justify-center mt-10 md:mt-12 gap-3">
-    {technologies.map((_, i) => (
-      <motion.button
-        key={i}
-        onClick={() => setActiveIndex(i)}
-        className={`w-3 h-3 md:w-4 md:h-4 rounded-full transition-all ${
-          i === activeIndex 
-            ? 'bg-gradient-to-r from-cyan-400 to-purple-500 scale-125' 
-            : 'bg-gray-600 hover:bg-gray-500'
-        }`}
-        whileHover={{ scale: 1.2 }}
-        whileTap={{ scale: 0.9 }}
-      />
-    ))}
-  </div>
-</motion.div>
+          {/* Contrôles de navigation */}
+          <div className="flex justify-center mt-10 md:mt-12 gap-3">
+            {technologies.map((_, i) => (
+              <motion.button
+                key={i}
+                onClick={() => setActiveTechIndex(i)}
+                className={`w-3 h-3 md:w-4 md:h-4 rounded-full transition-all ${
+                  i === activeTechIndex 
+                    ? 'bg-gradient-to-r from-cyan-400 to-purple-500 scale-125' 
+                    : 'bg-gray-600 hover:bg-gray-500'
+                }`}
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.9 }}
+              />
+            ))}
+          </div>
+        </motion.div>
 
         {/* Achievements */}
         <motion.div
